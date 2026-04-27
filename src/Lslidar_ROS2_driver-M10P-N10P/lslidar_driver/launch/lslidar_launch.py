@@ -1,15 +1,19 @@
 #!/usr/bin/python3
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
 from launch_ros.actions import LifecycleNode
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument
 
 import lifecycle_msgs.msg
 import os
 
 def generate_launch_description():
+
+    # 是否启动 RViz
+    use_rviz = LaunchConfiguration('use_rviz', default='true')
 
     driver_dir = os.path.join(get_package_share_directory('lslidar_driver'), 'params', 'lsx10.yaml')
                      
@@ -31,9 +35,14 @@ def generate_launch_description():
         executable='rviz2',
         name='rviz2',
         arguments=['-d', rviz_dir],
-        output='screen')
+        output='screen',
+        condition=IfCondition(use_rviz))
 
     return LaunchDescription([
+        DeclareLaunchArgument(
+            'use_rviz',
+            default_value='true',
+            description='是否启动 RViz (true/false)'),
         driver_node,
         rviz_node,
     ])

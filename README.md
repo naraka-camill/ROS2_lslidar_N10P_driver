@@ -2,6 +2,43 @@
 
 本 ROS 2 工作空间集成了 **Lslidar_ROS2_driver-M10P-N10P** 驱动包，用于雷神智能系统（Leishen Intelligent System）的激光雷达传感器，支持 M10、M10_GPS、M10_P、M10_PLUS、N10、L10 和 N10_P 系列。
 
+
+## 前言（开发细节）
+```bash
+ros2 interface show sensor_msgs/msg/LaserScan
+# 来自平面激光测距仪的单次扫描数据
+#
+# 如果你有其他测距设备且行为不同（例如声呐阵列），请查找或创建一个不同的消息类型，
+# 因为应用程序会根据此数据做出相当依赖激光特定假设的处理
+
+std_msgs/Header header # 消息头中的时间戳是该次扫描中第一条射线的采集时间
+        builtin_interfaces/Time stamp
+                int32 sec        # 秒
+                uint32 nanosec   # 纳秒
+        string frame_id          # 坐标系ID
+                                 # 扫描数据所在坐标系中的第一条射线
+                                 #
+                                 # 在 frame_id 坐标系中，角度围绕 Z 轴正方向测量
+                                 # （若 Z 轴向上，则为逆时针方向）
+                                 # 零度角对应沿 X 轴正方向（朝前）
+
+float32 angle_min            # 扫描起始角度 [弧度]
+float32 angle_max            # 扫描终止角度 [弧度]
+float32 angle_increment      # 相邻测量点之间的角度增量 [弧度]
+
+float32 time_increment       # 相邻测量点之间的时间间隔 [秒]
+                             # 如果扫描仪正在移动，此参数将用于插值计算3D点的位置
+float32 scan_time            # 完成一次完整扫描所需时间 [秒]
+
+float32 range_min            # 有效测距最小值 [米]
+float32 range_max            # 有效测距最大值 [米]
+
+float32[] ranges             # 距离数据数组 [米]
+                             # （注意：小于 range_min 或大于 range_max 的值应被丢弃）
+float32[] intensities        # 强度数据数组 [设备相关单位]
+                             # 如果设备不提供强度数据，请将此数组留空
+```
+
 ## 概述
 
 工作空间在 `src/Lslidar_ROS2_driver-M10P-N10P/` 下包含两个 ROS 2 包：
